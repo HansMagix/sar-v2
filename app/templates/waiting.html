@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-[80vh] flex flex-col items-center justify-center p-4">
+    <div
+        class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center relative overflow-hidden">
+
+        <!-- Animated Background Glow -->
+        <div
+            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50 animate-pulse">
+        </div>
+
+        <div class="mb-8 relative">
+            <!-- Spinner -->
+            <div id="spinner" class="relative w-20 h-20 mx-auto">
+                <div class="absolute inset-0 rounded-full border-4 border-slate-700"></div>
+                <div class="absolute inset-0 rounded-full border-t-4 border-emerald-500 animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-emerald-500 text-xl">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                </div>
+            </div>
+
+            <!-- Success Icon (Hidden initially) -->
+            <div id="icon-success"
+                class="hidden w-20 h-20 mx-auto bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-400 text-4xl mb-4 border border-emerald-500/20">
+                <i class="fa-solid fa-check"></i>
+            </div>
+
+            <!-- Fail Icon (Hidden initially) -->
+            <div id="icon-fail"
+                class="hidden w-20 h-20 mx-auto bg-red-500/10 rounded-full flex items-center justify-center text-red-400 text-4xl mb-4 border border-red-500/20">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+        </div>
+
+        <h2 id="status-title" class="text-2xl font-bold text-white mb-2">Check your phone</h2>
+        <p id="status-msg" class="text-slate-400 mb-8">We've sent an M-Pesa prompt to your number. Please enter your
+            PIN.</p>
+
+        <!-- Steps -->
+        <div id="steps" class="text-left bg-slate-900/50 rounded-lg p-4 space-y-3 text-sm text-slate-300 mb-6">
+            <div class="flex items-center gap-3">
+                <span
+                    class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold">1</span>
+                <span>Wait for the prompt on your phone</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span
+                    class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold">2</span>
+                <span>Enter M-Pesa PIN</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span
+                    class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold">3</span>
+                <span>Wait automatically redirects...</span>
+            </div>
+        </div>
+
+        <!-- Slow Response Warning (Hidden initially) -->
+        <div id="slow-warning"
+            class="hidden mb-6 bg-amber-900/20 border border-amber-500/20 rounded-lg p-4 text-sm animate-fade-in-down">
+            <p class="text-amber-200 mb-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Taking longer than
+                usual?</p>
+            <p class="text-slate-400 text-xs mb-3">If you haven't received a prompt yet, the network might be slow.</p>
+            <a href="/"
+                class="inline-block w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded transition text-xs uppercase tracking-wide">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Cancel & Retry
+            </a>
+        </div>
+
+        <div id="actions" class="hidden">
+            <a href="/"
+                class="block w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition">
+                Return Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const sessionId = "{{ session_id }}";
+    const statusTitle = document.getElementById('status-title');
+    const statusMsg = document.getElementById('status-msg');
+    const spinner = document.getElementById('spinner');
+    const iconSuccess = document.getElementById('icon-success');
+    const iconFail = document.getElementById('icon-fail');
+    const actions = document.getElementById('actions');
+    const steps = document.getElementById('steps');
+    const slowWarning = document.getElementById('slow-warning');
+
+    let startTime = Date.now();
+    let slowShown = false;
+
+    function checkStatus() {
+        if (!sessionId) return;
+
+        // 1. Soft Timeout Check (60 seconds)
+        const elapsed = (Date.now() - startTime) / 1000;
+        if (elapsed > 60 && !slowShown) {
+            slowWarning.classList.remove('hidden');
+            slowShown = true;
+        }
+
+        fetch(`/check_status/${sessionId}`)
+            .then(r => r.json())
+            .then(data => {
+                const status = data.status;
+                if (status === 'PAID') {
+                    // Success UI
+                    spinner.classList.add('hidden');
+                    iconSuccess.classList.remove('hidden');
+                    steps.classList.add('hidden');
+                    slowWarning.classList.add('hidden'); // Hide warning if it was shown
+
+                    statusTitle.innerText = "Payment Successful!";
+                    statusTitle.classList.add('text-emerald-400');
+                    statusMsg.innerText = "Upgrading your session...";
+
+                    setTimeout(() => {
+                        // Deep Link Restore
+                        const returnUrl = localStorage.getItem('sar_return_url');
+                        if (returnUrl) {
+                            localStorage.removeItem('sar_return_url');
+                            window.location.href = returnUrl;
+                        } else {
+                            window.location.href = "/";
+                        }
+                    }, 1500);
+
+                } else if (status === 'FAILED') {
+                    // Fail UI
+                    spinner.classList.add('hidden');
+                    iconFail.classList.remove('hidden');
+                    slowWarning.classList.add('hidden'); // Hide warning
+
+                    statusTitle.innerText = "Payment Failed";
+                    statusTitle.classList.add('text-red-400');
+                    statusMsg.innerText = "The transaction was cancelled or timed out.";
+
+                    actions.classList.remove('hidden');
+                } else {
+                    // Still Pending
+                    setTimeout(checkStatus, 3000);
+                }
+            })
+            .catch(e => {
+                console.error(e);
+                setTimeout(checkStatus, 3000);
+            });
+    }
+
+    // Start polling
+    setTimeout(checkStatus, 3000);
+</script>
+{% endblock %}

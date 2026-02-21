@@ -1,0 +1,151 @@
+{# 1. Security Warning (Top Priority) #}
+{% if security_warning %}
+<div class="col-span-full bg-orange-500/10 border border-orange-500/20 text-orange-400 p-6 rounded-xl text-center mb-6">
+    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/10 mb-3 text-orange-400">
+        <i class="fa-solid fa-shield-halved text-xl"></i>
+    </div>
+    <h3 class="font-bold text-lg mb-1">Privacy Check</h3>
+    <p class="text-sm text-orange-300/80">To protect our database, please select a specific <strong>Course</strong>,
+        <strong>University</strong>, or <strong>Cluster</strong>.
+    </p>
+</div>
+
+{# 2. Results List #}
+{% elif results %}
+{% for r in results %}
+<div
+    class="bg-slate-800 p-4 md:p-5 rounded-xl border {{ 'border-amber-500/50' if r.diff is defined and r.diff < 0 else ('border-green-500/50' if r.diff is defined and r.diff >= 0 else 'border-slate-700') }} hover:border-blue-500/40 transition hover:shadow-lg hover:shadow-blue-900/10 group relative overflow-hidden">
+
+    <!-- Comparison Checkbox (Dev: Enabled for All) -->
+    <div class="absolute top-3 right-3 z-10">
+        <input type="checkbox" onclick="handleCompare(this)" data-code="{{ r.code }}"
+            data-course='{{ r | tojson | safe }}'
+            class="w-5 h-5 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500/50 cursor-pointer shadow-lg">
+    </div>
+
+    <!-- Top Row -->
+    <div class="flex justify-between items-start mb-3">
+        <h3 class="text-white font-bold text-lg leading-snug w-[85%] group-hover:text-blue-400 transition break-words">
+            {{ r.name }}
+        </h3>
+        <!-- Added mr-8 to clear checkbox, increased size to text-sm -->
+        <span class="bg-slate-900 text-slate-500 text-sm font-mono px-2 py-1 rounded border border-slate-700 mr-8">{{
+            r.code }}</span>
+    </div>
+
+    <!-- Uni Row -->
+    <div class="text-slate-400 text-sm mb-6 flex items-center gap-2">
+        <i class="fa-solid fa-building-columns text-slate-600"></i> <span class="truncate">{{ r.institution }}</span>
+    </div>
+
+    <!-- Bottom Row (Action) -->
+    <div class="mt-auto pt-4 border-t border-slate-700/50 flex items-end justify-between">
+        <div>
+            <span class="text-[10px] uppercase text-slate-600 font-bold tracking-widest block mb-1">Likelihood</span>
+
+            <!-- Comparison Logic -->
+            {% if r.diff is defined %}
+            {% if r.diff >= 0 %}
+            <span class="text-xs font-mono font-bold text-emerald-400">
+                <i class="fa-solid fa-arrow-up"></i> +{{ r.diff }}
+            </span>
+            {% else %}
+            <span class="text-xs font-mono font-bold text-red-400">
+                <i class="fa-solid fa-arrow-down"></i> {{ r.diff }}
+            </span>
+            {% endif %}
+            {% endif %}
+
+            <!-- Badge Logic -->
+            {% if r.diff is defined %}
+            {% if r.diff < 0 %} <!-- Reach Badge -->
+                <span
+                    class="inline-flex items-center gap-1.5 text-amber-400 font-bold text-sm bg-amber-900/20 px-2 py-0.5 rounded border border-amber-500/20">
+                    <i class="fa-solid fa-person-hiking"></i> Reach ({{ "%.2f"|format(r.diff) }})
+                </span>
+                {% else %}
+                <!-- Safe Badge -->
+                <span
+                    class="inline-flex items-center gap-1.5 text-emerald-400 font-bold text-sm bg-emerald-900/20 px-2 py-0.5 rounded border border-emerald-500/20">
+                    <i class="fa-solid fa-shield-check"></i> Safe (+{{ "%.2f"|format(r.diff) }})
+                </span>
+                {% endif %}
+                {% elif r.status == 'Safe' %}
+                <span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold text-sm">
+                    <i class="fa-solid fa-circle-check"></i> High Chance
+                </span>
+                {% elif r.status == 'Risk' %}
+                <span class="inline-flex items-center gap-1.5 text-red-400 font-bold text-sm">
+                    <i class="fa-solid fa-circle-xmark"></i> Low Chance
+                </span>
+                {% elif r.status == 'Tight' %}
+                <span class="inline-flex items-center gap-1.5 text-yellow-400 font-bold text-sm">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Tight
+                </span>
+                {% elif r.status == 'Unknown' %}
+                <span
+                    class="inline-flex items-center gap-1.5 text-slate-500 text-xs font-bold border border-slate-700 px-2 py-1 rounded">
+                    <i class="fa-solid fa-circle-question"></i> No Data
+                </span>
+                {% elif r.status == 'Compare' %}
+                <!-- Basic Tier Comparison Mode (already showing diff above) -->
+                {% endif %}
+        </div>
+
+        <!-- Right Side: Cutoff Display (Always Visible) -->
+        <div class="text-right">
+            <span class="block text-[10px] text-slate-500 uppercase font-bold">Cutoff</span>
+            <span class="text-white font-mono font-bold text-lg">{{ r.cutoff if r.cutoff else 'N/A' }}</span>
+        </div>
+    </div>
+
+    <!-- Admissions Forecasting (Premium) -->
+    <!-- Admissions Forecasting (Free for All) -->
+    <div class="mt-4 pt-4 border-t border-slate-700/50">
+        {% if r.history %}
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Admissions Forecast</span>
+            <span
+                class="{{ r.trend_color }} text-xs font-bold border border-slate-700/50 px-2 py-0.5 rounded bg-slate-900">
+                {{ r.trend }}
+            </span>
+        </div>
+
+        <div class="mt-2">
+            <!-- Action: View Forecast -->
+            <button onclick="openForecast(this)" data-code="{{ r.code }}" data-name="{{ r.name }}"
+                data-inst="{{ r.institution }}" data-history='{{ r.history | tojson | safe }}'
+                data-labels='{{ r.history_labels | tojson | safe }}' data-trend="{{ r.trend }}"
+                class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-lg text-sm font-bold text-blue-400 flex items-center justify-center gap-2 transition group shadow-sm transition-all hover:shadow-blue-500/10 hover:border-blue-500/30">
+                <i class="fa-solid fa-chart-line text-blue-500 group-hover:scale-110 transition-transform"></i>
+                Check Cutoff Progress
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Cutoff (Hidden/Visible based on logic - keeping it minimal for now as per prompt "Public vs Premium Badge") -->
+</div>
+{% endfor %}
+
+{% if results|length == 100 %}
+<div class="col-span-full mt-4 text-center">
+    <div
+        class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-full border border-slate-700 text-xs text-slate-400">
+        <i class="fa-solid fa-info-circle"></i>
+        <span>Showing top 100 matches. Refine your filters to see more.</span>
+    </div>
+</div>
+{% endif %}
+
+{# 3. No Results (Empty State) #}
+{% else %}
+<div class="col-span-full text-center py-16 text-slate-600">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 mb-4">
+        <i class="fa-solid fa-filter text-2xl opacity-50"></i>
+    </div>
+    <h3 class="text-lg font-medium text-slate-500">No programmes found</h3>
+    <p class="text-sm text-slate-600">Try adjusting your filters.</p>
+</div>
+{% endif %}

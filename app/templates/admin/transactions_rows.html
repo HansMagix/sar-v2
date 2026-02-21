@@ -1,0 +1,59 @@
+{% for t in transactions %}
+<tr id="row-{{ t.id }}" class="hover:bg-gray-50 animate-fade-in">
+    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm whitespace-nowrap">
+        {{ t.created_at.strftime('%Y-%m-%d %H:%M') }}
+    </td>
+    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+        {% if t.status == 'PENDING' %}
+        <span
+            class="inline-block px-3 py-1 font-semibold text-amber-900 leading-tight bg-amber-200/50 rounded-full text-xs">
+            Pending
+        </span>
+        {% elif t.status == 'APPROVED' %}
+        <span
+            class="inline-block px-3 py-1 font-semibold text-green-900 leading-tight bg-green-200/50 rounded-full text-xs">
+            Approved
+        </span>
+        {% else %}
+        <span
+            class="inline-block px-3 py-1 font-semibold text-red-900 leading-tight bg-red-200/50 rounded-full text-xs">
+            {{ t.status|capitalize }}
+        </span>
+        {% endif %}
+    </td>
+    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-mono font-bold text-blue-600">
+        {{ t.mpesa_code }}
+    </td>
+    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+        {{ t.phone }}
+    </td>
+    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-bold">
+        {{ t.amount }} KES
+    </td>
+    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right whitespace-nowrap">
+        {% if t.status == 'PENDING' %}
+        <button onclick="approve('{{ t.id }}')"
+            class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded text-xs mr-2 transition">
+            <i class="fa-solid fa-check"></i>
+        </button>
+        <button onclick="reject('{{ t.id }}')"
+            class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-xs transition">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        {% elif t.status == 'APPROVED' %}
+        <button onclick="revoke('{{ t.id }}')"
+            class="bg-gray-200 hover:bg-red-100 text-red-600 border border-red-200 font-bold py-1 px-3 rounded text-xs transition">
+            <i class="fa-solid fa-ban mr-1"></i> Revoke
+        </button>
+        {% else %}
+        <span class="text-xs text-gray-400 italic">No actions</span>
+        {% endif %}
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="6" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
+        No transactions found.
+    </td>
+</tr>
+{% endfor %}

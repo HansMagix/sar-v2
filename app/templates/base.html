@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SAR v2 | Admissions Copilot{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Tom Select -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        /* Tom Select Dark Mode Override (Slate Theme) */
+        .ts-control {
+            background-color: #1e293b !important;
+            /* bg-slate-800 */
+            border-color: #334155 !important;
+            /* border-slate-700 */
+            color: #f8fafc !important;
+            /* text-slate-50 */
+            border-radius: 0.5rem;
+            padding: 12px;
+            box-shadow: none !important;
+        }
+
+        .ts-control input {
+            color: #f8fafc !important;
+        }
+
+        .ts-dropdown {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+            margin-top: 4px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+            z-index: 50 !important;
+        }
+
+        .ts-dropdown .option {
+            color: #cbd5e1;
+            /* text-slate-300 */
+            padding: 10px 12px;
+        }
+
+        .ts-dropdown .active {
+            background-color: #2563eb !important;
+            /* bg-blue-600 */
+            color: #ffffff !important;
+        }
+
+        .ts-wrapper.focus .ts-control {
+            border-color: #3b82f6 !important;
+            /* border-blue-500 */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+        }
+
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.8);
+            /* Slate-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ts-control {
+            min-height: 44px;
+            height: auto !important;
+            /* Grow as tags are added */
+        }
+
+        /* Fix Card Text Overflow */
+        .card-text {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-900 text-slate-50 font-sans antialiased min-h-screen flex flex-col selection:bg-blue-500 selection:text-white overflow-x-hidden">
+
+    <!-- Navbar -->
+    <nav class="glass-nav fixed w-full z-50 top-0 left-0 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-blue-500 text-xl"></i>
+                    <a href="/" class="text-xl font-bold tracking-tight text-white hover:text-blue-400 transition">
+                        SAR <span class="text-blue-500">v2</span>
+                    </a>
+                </div>
+
+                <!-- Right Side Actions -->
+                <div class="flex items-center space-x-4">
+                    <!-- Premium Access for All -->
+                    <span
+                        class="hidden md:inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700 tracking-wide">
+                        Free Edition
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow pt-28 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-8 space-y-2 animate-fade-in-down">
+            {% for category, message in messages %}
+            <div
+                class="p-4 rounded-lg border-l-4 shadow-lg flex items-center gap-3 {% if category == 'error' %}bg-red-900/20 border-red-500 text-red-200{% else %}bg-emerald-900/20 border-emerald-500 text-emerald-200{% endif %}">
+                <i
+                    class="fa-solid {% if category == 'error' %}fa-triangle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-950 mt-auto">
+        <div
+            class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-slate-400 text-sm">
+                <p>&copy; 2025 SAR v2. All rights reserved.</p>
+            </div>
+            <div class="flex space-x-6 text-slate-400">
+                <a href="#" class="hover:text-blue-400 transition"><i class="fa-brands fa-twitter text-xl"></i></a>
+                <a href="#" class="hover:text-blue-400 transition"><i class="fa-brands fa-github text-xl"></i></a>
+            </div>
+        </div>
+    </footer>
+    <!-- Payment Modal Removed -->
+
+    <script>
+        // No Polling Needed for Free Version
+    </script>
+</body>
+
+</html>

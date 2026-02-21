@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Project-specific (do NOT gitignore programmes.db — it's the data source)
+users.db
+ngrok.exe
+mysite.zip
+*.zip
+debug_search.py
+degree_programmes_updt.csv
+degree_programmes_updt2025.csv
+Implement Dream and Versus Modes.md
+
+# Vercel
+.vercel/
