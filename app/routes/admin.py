@@ -1,16 +1,11 @@
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, g
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, g, current_app
 from app.db import get_users_db
 import datetime
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-# Simple Secret Key
-ADMIN_KEY = "admin123"
-
 def is_admin():
-    # Check session or query param
-    # For now, simplistic check
-    return request.args.get('key') == ADMIN_KEY
+    return request.args.get('key') == current_app.config.get('ADMIN_KEY', '')
 
 @bp.route('/dashboard')
 def dashboard():
