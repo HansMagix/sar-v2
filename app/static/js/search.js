@@ -133,10 +133,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             });
 
-        } else {
-            // Single/No Cluster Mode
+        } else if (clusterArray.length === 1) {
+            // Single Cluster Mode
             inputPoints.classList.remove('hidden');
             dynamicContainer.classList.add('hidden');
+            inputPoints.disabled = false;
+            inputPoints.placeholder = `e.g. 34.5 for ${clusterArray[0]} (Max 48)`;
+            
+            const labelEl = document.getElementById('text-points');
+            if (labelEl) labelEl.innerText = `My ${clusterArray[0]} Points`;
+        } else {
+            // No Cluster Picked
+            inputPoints.classList.remove('hidden');
+            dynamicContainer.classList.add('hidden');
+            inputPoints.disabled = true;
+            inputPoints.value = ''; // clear value if unselected
+            inputPoints.placeholder = "Pick a cluster first...";
+            
+            const labelEl = document.getElementById('text-points');
+            if (labelEl) labelEl.innerText = "My Points (KCSE)";
         }
     }
 

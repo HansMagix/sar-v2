@@ -55,9 +55,9 @@
             class="md:col-span-3 border-t border-slate-700/50 pt-4 mt-2 flex flex-col md:flex-row md:items-center gap-4">
             <div class="w-full md:flex-grow">
                 <label class="block text-xs font-bold text-emerald-400 uppercase mb-2"><i
-                        class="fa-solid fa-calculator mr-1"></i> My Points (KCSE)</label>
-                <input type="number" id="input-points" step="0.001" min="0" max="48" placeholder="e.g. 34.5 (Max 48)"
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-emerald-500/50 outline-none transition">
+                        class="fa-solid fa-calculator mr-1"></i> <span id="text-points">My Points (KCSE)</span></label>
+                <input type="number" id="input-points" step="0.001" min="0" max="48" placeholder="Pick a cluster first..." disabled
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-emerald-500/50 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed">
 
                 <!-- Dynamic Per-Cluster Points -->
                 <div id="dynamic-points-container" class="space-y-3 mt-3 hidden"></div>
