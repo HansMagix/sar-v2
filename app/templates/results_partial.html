@@ -16,21 +16,26 @@
 <div
     class="bg-slate-800 p-4 md:p-5 rounded-xl border {{ 'border-amber-500/50' if r.diff is defined and r.diff < 0 else ('border-green-500/50' if r.diff is defined and r.diff >= 0 else 'border-slate-700') }} hover:border-blue-500/40 transition hover:shadow-lg hover:shadow-blue-900/10 group relative overflow-hidden">
 
-    <!-- Comparison Checkbox (Dev: Enabled for All) -->
-    <div class="absolute top-3 right-3 z-10">
-        <input type="checkbox" onclick="handleCompare(this)" data-code="{{ r.code }}"
-            data-course='{{ r | tojson | safe }}'
-            class="w-5 h-5 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500/50 cursor-pointer shadow-lg">
-    </div>
-
     <!-- Top Row -->
-    <div class="flex justify-between items-start mb-3">
-        <h3 class="text-white font-bold text-lg leading-snug w-[85%] group-hover:text-blue-400 transition break-words">
+    <div class="flex justify-between items-start mb-3 gap-3">
+        <h3 class="text-white font-bold text-lg leading-snug flex-1 group-hover:text-blue-400 transition break-words">
             {{ r.name }}
         </h3>
-        <!-- Added mr-8 to clear checkbox, increased size to text-sm -->
-        <span class="bg-slate-900 text-slate-500 text-sm font-mono px-2 py-1 rounded border border-slate-700 mr-8">{{
-            r.code }}</span>
+        
+        <div class="flex flex-col items-end gap-2 flex-shrink-0">
+            <!-- Program Code -->
+            <span class="bg-slate-900 text-slate-500 text-[11px] font-mono px-2 py-1 rounded border border-slate-700">
+                {{ r.code }}
+            </span>
+            
+            <!-- Comparison Toggle -->
+            <label class="flex items-center gap-2 bg-slate-900/50 px-2 py-1.5 rounded-lg border border-slate-700 hover:border-blue-500/50 hover:bg-slate-800 transition cursor-pointer group shadow-sm">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide group-hover:text-blue-300 transition select-none">Compare</span>
+                <input type="checkbox" onclick="handleCompare(this)" data-code="{{ r.code }}"
+                    data-course='{{ r | tojson | safe }}'
+                    class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500/50 cursor-pointer transition">
+            </label>
+        </div>
     </div>
 
     <!-- Uni Row -->
